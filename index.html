@@ -93,7 +93,7 @@
   <script>
     try {
       var typed = new Typed("#subtitle", {
-        strings: ['面朝大海，春暖花开', '愿你一生努力，一生被爱', '想要的都拥有，得不到的都释怀'],
+        strings: ['我所追求的，是星辰大海', '愿我一生努力，一生被爱', '以凡人之躯，比肩神明'],
         startDelay: 0,
         typeSpeed: 200,
         loop: true,
@@ -259,7 +259,12 @@ T(x)=10x;</script><p>也就是说，它在原点冻结，当我们进一步向�
 <script type="math/tex; mode=display">
 \frac{d}{dt}volume(\Omega)=\iint_{\partial\Omega}\overrightarrow{u}\cdot \hat{n}.</script><p>对于不可压缩流体，体积最好保持恒定，即变化率为0：</p>
 <script type="math/tex; mode=display">
-\iint_{\partial\Omega}\overrightarrow{u}\cdot \hat{n}=0</script><p>现在我们可以用散度定理把它变成体积积分。基本上，这是微积分基本定理的多维版本：如果你对一个函数的导数进行积分，你会得到原始函数在积分的范围内的值（如果你需要复习矢量微积分，请参阅附录A）。</p>
+\iint_{\partial\Omega}\overrightarrow{u}\cdot \hat{n}=0</script><p>现在我们可以用散度定理把它变成体积积分。基本上，这是微积分基本定理的多维版本：如果你对一个函数的导数进行积分，你会得到原始函数在积分的范围内的值（如果你需要复习矢量微积分，请参阅附录A）。在这种情况下，我们得到：</p>
+<script type="math/tex; mode=display">
+\iiint_{\Omega}\nabla\cdot\overrightarrow{u}=0</script><p>接下来就是最玄幻的部分了：这个方程应该对所有的 $\Omega$ （任意流体区域）成立。唯一一个不受体积影响，积分为零的连续函数是零函数。因此，被积函数处处为0：</p>
+<script type="math/tex; mode=display">
+\nabla\cdot\overrightarrow{u}=0.</script><p>这个式子就是不可压缩条件，是不可压缩NS方程的另一部分。</p>
+<p>一个满足不可压缩条件的向量场被称为无散度的，</p>
  
       <!-- reward -->
       
