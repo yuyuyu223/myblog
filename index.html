@@ -191,7 +191,7 @@
   <p>流体就在我们身边，或是我们呼吸的空气，获知覆盖地球2/3的海洋。它也是我们所知道的一些最美丽、最令人印象深刻的现象的核心。从水的飞溅到火焰和烟雾的旋转，流体已经成为计算机图形学的重要组成部分。这本书旨在介绍模拟这些动画效果的基础知识。所以让我们直接讨论一下流体运动的基本方程。</p>
 <p>动画中大多数有趣的流体的流动都由著名的纳维-斯托克斯方程（N-S方程）控制。这是一组偏微分方程，理论上应该在整个流体中都成立。方程经常写作：</p>
 <script type="math/tex; mode=display">
-\frac{\partial \overrightarrow{u}}{\partial t}+\overrightarrow{u} \nabla\overrightarrow{u}+\frac{1}{\rho}\nabla p=\overrightarrow{g}+\nu\nabla \cdot \nabla\overrightarrow{u}\\
+\frac{\partial \overrightarrow{u}}{\partial t}+\overrightarrow{u}\cdot\nabla\overrightarrow{u}+\frac{1}{\rho}\nabla p=\overrightarrow{g}+\nu\nabla \cdot \nabla\overrightarrow{u}\\
 \nabla\cdot \overrightarrow{u}=0</script><p>这第一眼看起来会很难，但我们很快会把他们细分成易于理解的小部分（在附录B中有严格的解释），但我们首先来看一下上式每一个符号的含义。</p>
 <h2 id="N-S方程的符号"><a href="#N-S方程的符号" class="headerlink" title="N-S方程的符号"></a>N-S方程的符号</h2><p> $\overrightarrow{u}$ 是流体仿真中经常用于描述速度的，为什么不用 $\overrightarrow{v}$ 呢？这很难说，主要是为三维速度的描述($u,v,w$)提供方便，就像 $\overrightarrow{x}$  和 ($x,y,z$) 一样。</p>
 <p>$\rho$ 表示流体的密度，水的密度是 $1000 kg/m^3$ ，而空气的密度大致是 $1.3kg/m^3$ ，大约是 $700:1$</p>
@@ -264,7 +264,28 @@ T(x)=10x;</script><p>也就是说，它在原点冻结，当我们进一步向�
 \iiint_{\Omega}\nabla\cdot\overrightarrow{u}=0</script><p>接下来就是最玄幻的部分了：这个方程应该对所有的 $\Omega$ （任意流体区域）成立。唯一一个不受体积影响，积分为零的连续函数是零函数。因此，被积函数处处为0：</p>
 <script type="math/tex; mode=display">
 \nabla\cdot\overrightarrow{u}=0.</script><p>这个式子就是不可压缩条件，是不可压缩NS方程的另一部分。</p>
-<p>一个满足不可压缩条件的向量场被称为无散度的，</p>
+<p>一个满足不可压缩条件的向量场被称为无散度的，模拟不可压缩流体的难点在于如何保证速度场是无发散的，这也是压力的来源。</p>
+<p>考虑压力的一种方法是，压力无论如何都要保持速度无发散。如果您熟悉约束动力学，您可以将不可压缩条件视为约束，将压力场视为根据零虚拟功原理满足该约束所需的拉格朗日乘数。如果你不熟悉，别担心，让我们确确实实地揭示压力为何物。</p>
+<p>压力仅仅出现在动量方程中，我们想用一些方法将它与速度的散度联系起来。因此，让我们在动量方程的两侧同时取散度：</p>
+<script type="math/tex; mode=display">
+\nabla\cdot\frac{\partial \overrightarrow{u}}{\partial t}+\nabla\cdot(\overrightarrow{u} \cdot\nabla\overrightarrow{u})+\nabla\cdot\frac{1}{\rho}\nabla p=\nabla\cdot(\overrightarrow{g}+\nu\nabla \cdot \nabla\overrightarrow{u}).</script><p>我们可以将第一项的微分顺序更改为散度的时间导数：</p>
+<script type="math/tex; mode=display">
+\frac{\partial}{\partial t}\nabla\cdot\overrightarrow{u}.</script><p>如果不可压缩条件成立，上式一直为0，随后整理式子，得到压力的方程：</p>
+<script type="math/tex; mode=display">
+\nabla\cdot\frac{1}{\rho}\nabla p=\nabla\cdot(-\overrightarrow{u} \cdot\nabla\overrightarrow{u}+\overrightarrow{g}+\nu\nabla \cdot \nabla\overrightarrow{u}).</script><p>这与我们的数值模拟并不完全相关，但值得一看，因为我们将经历几乎完全相同的步骤，从观察体积变化的速度到压力方程。</p>
+<h2 id="降低粘度"><a href="#降低粘度" class="headerlink" title="降低粘度"></a>降低粘度</h2><p>在一些情况下，粘度力是非常重要的：例如，模拟蜂蜜或者特别小型的流体流动的时候。但是在大部分其他情况中，粘度起次要作用：方程很好很简单。事实上，大多数模拟流体的数值方法不可避免地会引入误差，可以在物理上重新解释为粘度（稍后将详细介绍）——所以即使我们在方程中降低粘度，我们仍然会得到类似的东西。事实上，计算流体动力学的最大挑战之一是尽可能避免这种粘性误差。因此，除了第8章会关注高粘度流体甚至变化粘度的流体，在本书的其余部分，我们将假设粘度已经忽略。</p>
+<p>不包含粘度的NS方程叫做欧拉方程，这种没有粘度的理想流体被称为无粘性液体。为了明确公式去掉了什么，下面给出不可压缩的欧拉方程，使用物质导数来彰显其简单性：</p>
+<script type="math/tex; mode=display">
+\frac{D\overrightarrow{u}}{Dt}+\frac{1}{\rho}\nabla p=\overrightarrow{g}\\
+\nabla\cdot\overrightarrow{u}=0.</script><p>这是我们最常用的方程式。</p>
+<h2 id="边界条件"><a href="#边界条件" class="headerlink" title="边界条件"></a>边界条件</h2><p>在数值模拟流体中，大多数“有趣”的工作是在纠正边界条件。到目前为止，我们只讨论了在流体内部发生了什么：那么在边界上发生了什么呢？</p>
+<p>在这本书中，我们将只关注两个边界条件，固体壁和自由表面。我们不会提及的一个重要案例是两种不同流体之间的边界：通常在动画中不需要这样做，但如果你感兴趣，看看洪和金[Hong and Kim 05]的论文。</p>
+<p>固体壁的边界是流体与固体接触的地方。用最简单的速度来说：流体最好不要流入固体或流出固体，因此速度的正常分量必须为零：</p>
+<script type="math/tex; mode=display">
+\overrightarrow{u}\cdot \hat{n}=0.</script><p>如果固体本身也在移动，事情就会更复杂一些。一般来说，我们需要流体速度的法线分量来匹配固体速度的法线分量，这样相对速度的法线分量为零：</p>
+<script type="math/tex; mode=display">
+\overrightarrow{u}\cdot \hat{n}=\overrightarrow{u}_{solid}\cdot \hat{n}.</script><p>在这两个方程中，$\hat{n}$ 当然是固体边界的法线。这有时被称为不粘条件，因为我们只限制速度的法线分量，允许流体沿切向方向自由滑过。这是需要记住的重要一点：流体的切向速度可能与固体的切向速度没有任何关系。</p>
+<p>所以速度就是这样的：固体壁上的压力怎么样？我们再次回到这样的观点，即压力是“如何使流体不可压缩”。我们将再补充一点，“并保持固体墙的边界条件。”  在动力方程中，$\nabla p/\rho$ 甚至适用于边界，所以在固体壁控制 $\overrightarrow{u}\cdot \hat{n}$ 的压力和 $\nabla p\cdot\hat{n}$ 有关 ，也称压力的法线导数：$\partial p/\partial\hat{n}$ 。 我们将等到我们开始用数值方法来处理边界条件后才更加精确的说明这一点。</p>
  
       <!-- reward -->
       
