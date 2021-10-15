@@ -157,6 +157,88 @@
     
     
     <article
+  id="post-2.数值模拟概述"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/myblog/2021/10/15/2.%E6%95%B0%E5%80%BC%E6%A8%A1%E6%8B%9F%E6%A6%82%E8%BF%B0/"
+    >第二章 数值模拟概述</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/myblog/2021/10/15/2.%E6%95%B0%E5%80%BC%E6%A8%A1%E6%8B%9F%E6%A6%82%E8%BF%B0/" class="article-date">
+  <time datetime="2021-10-15T02:03:34.000Z" itemprop="datePublished">2021-10-15</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/myblog/categories/%E6%B5%81%E4%BD%93%E4%BB%BF%E7%9C%9F/">流体仿真</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>既然我们已经知道并理解了这些基本方程，那么我们如何将它们离散化，并用计算机进行数值模拟呢?如何做到这一点有很多选择，人们还在不断地发明新方法;我们无法涵盖其中的一小部分，但将专注于一种高质量的方法，非常适用于图像。</p>
+<h2 id="分解"><a href="#分解" class="headerlink" title="分解"></a>分解</h2><p>这种方法的原理是分解:我们将一个复杂的方程分解成各个组成部分，然后依次分别求解。如果我们说一个量的变化率是几项的和，我们可以通过计算每一项，并将它们逐个相加来数值更新它。</p>
+<p>让我们用一个非常简单的“玩具”例子来更清楚地说明这一点，一个常微分方程:</p>
+<script type="math/tex; mode=display">
+\frac{dq}{dt}=1+2.</script><p>你们当然已经知道答案是 $q(t)=3t + q(0)$ 但是让我们来算一个基于分解的数值方法。我们将把它分成两个步骤，每个步骤看起来都像是一个简单的前向Euler更新（如果你想提醒自己什么是<a target="_blank" rel="noopener" href="https://www.yuque.com/docs/share/b95e9a5c-f4a4-45ed-a9d6-38813aaa0590?# 《常微分方程数值解法》">前向Euler</a>，请参阅附录a）：</p>
+<script type="math/tex; mode=display">
+\tilde{q}=q^n+1\triangle t,\\
+q^{n+1}=\tilde{q}+2\triangle t.</script><p>这里使用的符号是： $q^n$ 是时间点 $n$ 时 $q$ 的值，$Δt$ 是时间步长，我们所做的是将等式分成两个步骤：在第一步之后，我们得到一个包含第一项(= 1)而不包含第二项(= 2)贡献的中间量，然后第二步用中间量加上增加缺失项的贡献。在这个例子中，很明显，我们得到了完全正确的答案，而分裂并没有给我们带来任何东西。</p>
+<p>让我们将示例升级到更有趣的内容：</p>
+<script type="math/tex; mode=display">
+\frac{dq}{dt}=f(q)+g(q).</script><p>这里 $f()$ 和 $g()$ 是一些代表独立软件模块的黑盒函数。我们可以用正向欧拉法来做分解：</p>
+<script type="math/tex; mode=display">
+\tilde{q}=q^n+\triangle t f(q^n),\\
+q^{n+1}=\tilde{q}+\triangle t g(\tilde{q}).</script><p>简单的泰勒级数分析表明，如果你担心(如果你不担心，忽略这一点)，这仍然是一个一阶精确算法：</p>
+<script type="math/tex; mode=display">
+q^{n+1}=(q^n+\triangle tf(q^n))+\triangle tg(q^n+\triangle tf(q^n))\\
+=q^n+\triangle tf(q^n)+\triangle t(g(q^n)+O(\triangle t))\\
+=q^n+\triangle t(f(q^n)+g(q^n))+O(\triangle t^2)\\
+=q^n+\frac{dq}{dt}\triangle t+O(\triangle t^2)</script><p>等等，你会说，除了简单的不分解的正向欧拉公式之外，这并没有给你带来任何东西。啊哈!这是我们更复杂的地方。让我们将 $f()$ 和 $g()$ 分解为不同的软件模块的原因是，我们有特别的数值方法，它们非常擅长解决较简单的方程：</p>
+<script type="math/tex; mode=display">
+\frac{dr}{dt}=f(r),\\
+\frac{ds}{dt}=g(s).</script><p>这正是分解的动机：我们可能无法轻松地处理整个方程的复杂性，但它是由独立的项构建的，我们确实有很好的方法。我将这种特殊的积分算法称为 $F(Δt, r)$ 和 $G(Δt, s)$ ，我们的分解方法是：</p>
+<script type="math/tex; mode=display">
+\tilde{q}=F(Δt, q^n),\\
+q^{n+1}=G(Δt, \tilde{q}).</script><p>如果 $F()$ 和 $G()$ 是正欧拉的，那么这就完全和上文的迭代方程一样，但我的想法是，它们更好。如果你做泰勒级数分析，你可以证明我们仍然有一个一阶精确的方法，但我把它留作练习。</p>
+<p>分解实际上就是微分方程的分治原则：解决整个问题可能太难了，但你可以把它分解成更容易解决的部分，然后再把解组合起来。</p>
+<p>如果你有头脑，你可能会想到一种不同的方法来组合不同的部分：而不是顺序地计算 $F()$，然后把它代入 $G()$，你可以并行运行 $F()$ 和 $G()$ 并把它们的贡献加起来。我们不打算这样做，而是坚持按顺序完成这些步骤的原因是，我们的特殊算法(本例中的积分器F()和G())将保证它们的输出有特殊的东西，这些东西是其他算法输入的先决条件。按照正确的顺序来做会让所有的事情的进行有保证，但是并行地做会打乱这些保证。在下一节中，我们将详细讨论这些保证和先决条件是什么。</p>
+<h2 id="分解流体方程"><a href="#分解流体方程" class="headerlink" title="分解流体方程"></a>分解流体方程</h2><p>我们将在不可压缩流体方程中用到分解。特别地，我们将分离出平流部分，物体力（重力）部分，和压力/不可压缩部分。如果粘度很重要，我们也将把它分开：见第8章</p>
+<p>也就是说，我们将找出解决这些简单方程的方法：</p>
+ 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/myblog/tags/%E6%B5%81%E4%BD%93%E4%BB%BF%E7%9C%9F/" rel="tag">流体仿真</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-1.流体的方程"
   class="article article-type-post"
   itemscope
@@ -286,6 +368,19 @@ T(x)=10x;</script><p>也就是说，它在原点冻结，当我们进一步向�
 <script type="math/tex; mode=display">
 \overrightarrow{u}\cdot \hat{n}=\overrightarrow{u}_{solid}\cdot \hat{n}.</script><p>在这两个方程中，$\hat{n}$ 当然是固体边界的法线。这有时被称为不粘条件，因为我们只限制速度的法线分量，允许流体沿切向方向自由滑过。这是需要记住的重要一点：流体的切向速度可能与固体的切向速度没有任何关系。</p>
 <p>所以速度就是这样的：固体壁上的压力怎么样？我们再次回到这样的观点，即压力是“如何使流体不可压缩”。我们将再补充一点，“并保持固体墙的边界条件。”  在动力方程中，$\nabla p/\rho$ 甚至适用于边界，所以在固体壁控制 $\overrightarrow{u}\cdot \hat{n}$ 的压力和 $\nabla p\cdot\hat{n}$ 有关 ，也称压力的法线导数：$\partial p/\partial\hat{n}$ 。 我们将等到我们开始用数值方法来处理边界条件后才更加精确的说明这一点。</p>
+<p>这就是无粘流体的固体壁边界所需要的，如果流体有粘度，就会变得更加复杂一些。在这种情况下，固体的粘性可能会对流体速度的切向分量产生影响。最简单的情况是无滑移边界条件，可以简单地说：</p>
+<script type="math/tex; mode=display">
+\overrightarrow{u}=0</script><p>或者如果固体在移动，我们有：</p>
+<script type="math/tex; mode=display">
+\overrightarrow{u}=\overrightarrow{u}_{solid}</script><p>同样，在我们进入数值方法实现之前，我们将避免讨论具体的细节。</p>
+<p>注意，有时固体墙实际上是一个通风管道或排水口，流体可以通过：在这种情况下，我们显然希望 $\overrightarrow{u}\cdot\hat{n}$ 不同于墙的速度，而是模拟流体在一点泵入或泵出的速度。</p>
+<p>自由表面是我们感兴趣的另一个边界条件，这就是我们停止建模流体的地方。例如，如果我们模拟水在周围飞溅的场景，那么那些与固体壁不接触的水面就是自由表面。在这种情况下，确实有那么一种流体——空气，但是我们可能不想处理模拟空气的麻烦。由于空气比水轻700倍，所以它无论如何也不能对水产生那么大的影响。因此，我们使建模简化，空气可以表示为一个具有恒定大气压的区域。事实上，由于只有压力物质的差异(在不可压缩流动中)，我们可以将空气压力设为任意常数：0是最方便的。因此，自由表面上有 $p=0$ ，我们不以任何特定的方式控制速度。</p>
+<p>另一种出现自由表面的情况是，我们试图模拟作为一个更大的区域的一部分的一些流体：例如在露天空气中模拟烟雾。显然，我们模拟整个地球的大气层是不现实的，所以我们将建立一个网格，覆盖我们觉得“有趣”的区域。（我将在这里先发制人地指出，为了模拟烟雾，你也需要模拟附近的无烟空气，而不仅仅是烟雾区域本身——然而，我们可以避免模拟离所有动作足够远的那些空气。）通过模拟区域的边界，流体继续前进，但我们没有跟踪它；我们允许流体按照它想要的方式进出这个区域，所以很自然地认为这是一个自由的表面，所以 $p=0$ ，即使这不是一个可以看到的表面。</p>
+<p>关于自由表面的最后一点是：对于较小尺度的液体，表面张力可能非常重要。在微观分子水平上，表面张力的存在是因为不同类型的分子之间的吸引强度不同。例如，水分子对其他水分子的吸引比对空气分子的吸引更强烈：因此，位于分离水和空气的表面的水分子试图移动，尽可能地被水包围。从几何的角度来看，物理化学家将其建模为一种试图最小化表面积的行为，或者，等价地，试图降低表面的平均曲率的力。您可以将第一个想法（最小化表面积）解释为不断试图收缩表面的张力，因此命名为表面张力；使用使用平均曲率的第二种方法可以更方便一些。（稍后，在第6章中，我们将讨论如何实际测量平均曲率以及它的确切含义。）简而言之，这个模型是两种流体之间实际上有压力跳跃，与平均曲率成正比：</p>
+<script type="math/tex; mode=display">
+[p] = \gamma\kappa</script><p>$[p]$ 符号表示压力的跳跃，即在水边测量和在空气侧测量的压力差，$γ$ 是您可以查找的表面张力系数(对于室温下的水和空气，约为 $γ≈0.073N/m$ )，$κ$ 是平均曲率，测量单位为 $1/m$ 。这对于具有表面张力的自由表面意味着说，水表面的压力是空气压力（我们假设为零）加上压力跳跃：</p>
+<script type="math/tex; mode=display">
+p = \gamma\kappa</script><p>自由表面确实有一个主要问题：气泡立即坍塌（内部没有压力来阻止它们失去体积）。虽然空气比水轻得多，所以通常可能无法向水传递多少动量，但它仍然有不可压缩性约束：水中的气泡在很大程度上保持了其体积。用自由表面模拟气泡将使气泡坍塌和消失。要处理这种情况，你需要在自由表面流动中添加气泡颗粒，或者更普遍地进行空气和水的模拟(称为两相流，因为涉及两种流体类型)。同样，我们在这本书中不会涉及到这些。</p>
  
       <!-- reward -->
       

@@ -13,7 +13,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>流体仿真 |  于博士的学习空间</title>
+      <title>第二章 数值模拟概述 |  于博士的学习空间</title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -55,85 +55,235 @@
       
     <main class="content on">
       <section class="outer">
-  
-  
-  <article class="articles">
+  <article
+  id="post-2.数值模拟概述"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
     
-    
-    <h1 class="page-type-title">流体仿真</h1>
-    
-    
-  
-  
-  
-  
-  
-  
-  <div class="archives-wrap">
-    <div class="archive-year-wrap">
-      <a href="/myblog/archives/2021" class="archive-year">2021</a>
-    </div>
-    <div class="archives">
-      
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/myblog/2021/10/15/2.%E6%95%B0%E5%80%BC%E6%A8%A1%E6%8B%9F%E6%A6%82%E8%BF%B0/" class="archive-article-date">
-  <time datetime="2021-10-15T02:03:34.000Z" itemprop="datePublished">10/15</time>
-</a>
+    <header class="article-header">
        
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/myblog/2021/10/15/2.%E6%95%B0%E5%80%BC%E6%A8%A1%E6%8B%9F%E6%A6%82%E8%BF%B0/"
-    >第二章 数值模拟概述</a> 
-</h2>
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  第二章 数值模拟概述
+</h1>
  
 
-    </header>
-    
       
+    </header>
+     
+    <div class="article-meta">
+      <a href="/myblog/2021/10/15/2.%E6%95%B0%E5%80%BC%E6%A8%A1%E6%8B%9F%E6%A6%82%E8%BF%B0/" class="article-date">
+  <time datetime="2021-10-15T02:03:34.000Z" itemprop="datePublished">2021-10-15</time>
+</a> 
   <div class="article-category">
     <a class="article-category-link" href="/myblog/categories/%E6%B5%81%E4%BD%93%E4%BB%BF%E7%9C%9F/">流体仿真</a>
   </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">1.2k</span>
+        </span>
+    </span>
 
-    
-    
-  </div>
-</article>
-      
-  
-  
-      <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/myblog/2021/10/08/1.%E6%B5%81%E4%BD%93%E7%9A%84%E6%96%B9%E7%A8%8B/" class="archive-article-date">
-  <time datetime="2021-10-08T14:05:56.000Z" itemprop="datePublished">10/08</time>
-</a>
-       
-<h2 itemprop="name">
-  <a class="archive-article-title" href="/myblog/2021/10/08/1.%E6%B5%81%E4%BD%93%E7%9A%84%E6%96%B9%E7%A8%8B/"
-    >第一章 流体的方程</a> 
-</h2>
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">4 min</span>
+        </span>
+    </span>
+</div>
  
-
-    </header>
-    
+    </div>
       
-  <div class="article-category">
-    <a class="article-category-link" href="/myblog/categories/%E6%B5%81%E4%BD%93%E4%BB%BF%E7%9C%9F/">流体仿真</a>
-  </div>
+    <div class="tocbot"></div>
 
-    
-    
-  </div>
-</article>
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>既然我们已经知道并理解了这些基本方程，那么我们如何将它们离散化，并用计算机进行数值模拟呢?如何做到这一点有很多选择，人们还在不断地发明新方法;我们无法涵盖其中的一小部分，但将专注于一种高质量的方法，非常适用于图像。</p>
+<h2 id="分解"><a href="#分解" class="headerlink" title="分解"></a>分解</h2><p>这种方法的原理是分解:我们将一个复杂的方程分解成各个组成部分，然后依次分别求解。如果我们说一个量的变化率是几项的和，我们可以通过计算每一项，并将它们逐个相加来数值更新它。</p>
+<p>让我们用一个非常简单的“玩具”例子来更清楚地说明这一点，一个常微分方程:</p>
+<script type="math/tex; mode=display">
+\frac{dq}{dt}=1+2.</script><p>你们当然已经知道答案是 $q(t)=3t + q(0)$ 但是让我们来算一个基于分解的数值方法。我们将把它分成两个步骤，每个步骤看起来都像是一个简单的前向Euler更新（如果你想提醒自己什么是<a target="_blank" rel="noopener" href="https://www.yuque.com/docs/share/b95e9a5c-f4a4-45ed-a9d6-38813aaa0590?# 《常微分方程数值解法》">前向Euler</a>，请参阅附录a）：</p>
+<script type="math/tex; mode=display">
+\tilde{q}=q^n+1\triangle t,\\
+q^{n+1}=\tilde{q}+2\triangle t.</script><p>这里使用的符号是： $q^n$ 是时间点 $n$ 时 $q$ 的值，$Δt$ 是时间步长，我们所做的是将等式分成两个步骤：在第一步之后，我们得到一个包含第一项(= 1)而不包含第二项(= 2)贡献的中间量，然后第二步用中间量加上增加缺失项的贡献。在这个例子中，很明显，我们得到了完全正确的答案，而分裂并没有给我们带来任何东西。</p>
+<p>让我们将示例升级到更有趣的内容：</p>
+<script type="math/tex; mode=display">
+\frac{dq}{dt}=f(q)+g(q).</script><p>这里 $f()$ 和 $g()$ 是一些代表独立软件模块的黑盒函数。我们可以用正向欧拉法来做分解：</p>
+<script type="math/tex; mode=display">
+\tilde{q}=q^n+\triangle t f(q^n),\\
+q^{n+1}=\tilde{q}+\triangle t g(\tilde{q}).</script><p>简单的泰勒级数分析表明，如果你担心(如果你不担心，忽略这一点)，这仍然是一个一阶精确算法：</p>
+<script type="math/tex; mode=display">
+q^{n+1}=(q^n+\triangle tf(q^n))+\triangle tg(q^n+\triangle tf(q^n))\\
+=q^n+\triangle tf(q^n)+\triangle t(g(q^n)+O(\triangle t))\\
+=q^n+\triangle t(f(q^n)+g(q^n))+O(\triangle t^2)\\
+=q^n+\frac{dq}{dt}\triangle t+O(\triangle t^2)</script><p>等等，你会说，除了简单的不分解的正向欧拉公式之外，这并没有给你带来任何东西。啊哈!这是我们更复杂的地方。让我们将 $f()$ 和 $g()$ 分解为不同的软件模块的原因是，我们有特别的数值方法，它们非常擅长解决较简单的方程：</p>
+<script type="math/tex; mode=display">
+\frac{dr}{dt}=f(r),\\
+\frac{ds}{dt}=g(s).</script><p>这正是分解的动机：我们可能无法轻松地处理整个方程的复杂性，但它是由独立的项构建的，我们确实有很好的方法。我将这种特殊的积分算法称为 $F(Δt, r)$ 和 $G(Δt, s)$ ，我们的分解方法是：</p>
+<script type="math/tex; mode=display">
+\tilde{q}=F(Δt, q^n),\\
+q^{n+1}=G(Δt, \tilde{q}).</script><p>如果 $F()$ 和 $G()$ 是正欧拉的，那么这就完全和上文的迭代方程一样，但我的想法是，它们更好。如果你做泰勒级数分析，你可以证明我们仍然有一个一阶精确的方法，但我把它留作练习。</p>
+<p>分解实际上就是微分方程的分治原则：解决整个问题可能太难了，但你可以把它分解成更容易解决的部分，然后再把解组合起来。</p>
+<p>如果你有头脑，你可能会想到一种不同的方法来组合不同的部分：而不是顺序地计算 $F()$，然后把它代入 $G()$，你可以并行运行 $F()$ 和 $G()$ 并把它们的贡献加起来。我们不打算这样做，而是坚持按顺序完成这些步骤的原因是，我们的特殊算法(本例中的积分器F()和G())将保证它们的输出有特殊的东西，这些东西是其他算法输入的先决条件。按照正确的顺序来做会让所有的事情的进行有保证，但是并行地做会打乱这些保证。在下一节中，我们将详细讨论这些保证和先决条件是什么。</p>
+<h2 id="分解流体方程"><a href="#分解流体方程" class="headerlink" title="分解流体方程"></a>分解流体方程</h2><p>我们将在不可压缩流体方程中用到分解。特别地，我们将分离出平流部分，物体力（重力）部分，和压力/不可压缩部分。如果粘度很重要，我们也将把它分开：见第8章</p>
+<p>也就是说，我们将找出解决这些简单方程的方法：</p>
+ 
+      <!-- reward -->
       
+      <div id="reword-out">
+        <div id="reward-btn">
+          Donate
+        </div>
+      </div>
       
     </div>
-  </div>
-  
-  
+    
 
-  
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://yuyuyu223.github.io/myblog/2021/10/15/2.%E6%95%B0%E5%80%BC%E6%A8%A1%E6%8B%9F%E6%A6%82%E8%BF%B0/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/myblog/tags/%E6%B5%81%E4%BD%93%E4%BB%BF%E7%9C%9F/" rel="tag">流体仿真</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/myblog/2021/10/08/1.%E6%B5%81%E4%BD%93%E7%9A%84%E6%96%B9%E7%A8%8B/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">第一章 流体的方程</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "",
+    app_key: "",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
 </section>
       <footer class="footer">
   <div class="outer">
@@ -282,6 +432,22 @@
 <script src="/myblog/js/lazyload.min.js"></script>
 
 <!-- Tocbot -->
+ 
+<script src="/myblog/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
 <link
