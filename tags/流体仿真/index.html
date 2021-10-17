@@ -39,6 +39,8 @@
 
       <!-- mermaid -->
       
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js"></script>
+      
       <style>
         .swal2-styled.swal2-confirm {
           font-size: 1.6rem;
@@ -52,6 +54,17 @@
 <body>
   <div id="app">
     
+      <canvas class="fireworks"></canvas>
+      <style>
+        .fireworks {
+          position: fixed;
+          left: 0;
+          top: 0;
+          z-index: 99999;
+          pointer-events: none;
+        }
+      </style>
+      
       
     <main class="content on">
       <section class="outer">
@@ -78,12 +91,12 @@
       <article class="archive-article archive-type-post">
   <div class="archive-article-inner">
     <header class="archive-article-header">
-      <a href="/myblog/2021/10/15/2.%E6%95%B0%E5%80%BC%E6%A8%A1%E6%8B%9F%E6%A6%82%E8%BF%B0/" class="archive-article-date">
+      <a href="/myblog/2021/10/15/%E6%B5%81%E4%BD%93%E4%BB%BF%E7%9C%9F/2.%E6%95%B0%E5%80%BC%E6%A8%A1%E6%8B%9F%E6%A6%82%E8%BF%B0/" class="archive-article-date">
   <time datetime="2021-10-15T02:03:34.000Z" itemprop="datePublished">10/15</time>
 </a>
        
 <h2 itemprop="name">
-  <a class="archive-article-title" href="/myblog/2021/10/15/2.%E6%95%B0%E5%80%BC%E6%A8%A1%E6%8B%9F%E6%A6%82%E8%BF%B0/"
+  <a class="archive-article-title" href="/myblog/2021/10/15/%E6%B5%81%E4%BD%93%E4%BB%BF%E7%9C%9F/2.%E6%95%B0%E5%80%BC%E6%A8%A1%E6%8B%9F%E6%A6%82%E8%BF%B0/"
     >第二章 数值模拟概述</a> 
 </h2>
  
@@ -103,12 +116,12 @@
       <article class="archive-article archive-type-post">
   <div class="archive-article-inner">
     <header class="archive-article-header">
-      <a href="/myblog/2021/10/08/1.%E6%B5%81%E4%BD%93%E7%9A%84%E6%96%B9%E7%A8%8B/" class="archive-article-date">
+      <a href="/myblog/2021/10/08/%E6%B5%81%E4%BD%93%E4%BB%BF%E7%9C%9F/1.%E6%B5%81%E4%BD%93%E7%9A%84%E6%96%B9%E7%A8%8B/" class="archive-article-date">
   <time datetime="2021-10-08T14:05:56.000Z" itemprop="datePublished">10/08</time>
 </a>
        
 <h2 itemprop="name">
-  <a class="archive-article-title" href="/myblog/2021/10/08/1.%E6%B5%81%E4%BD%93%E7%9A%84%E6%96%B9%E7%A8%8B/"
+  <a class="archive-article-title" href="/myblog/2021/10/08/%E6%B5%81%E4%BD%93%E4%BB%BF%E7%9C%9F/1.%E6%B5%81%E4%BD%93%E7%9A%84%E6%96%B9%E7%A8%8B/"
     >第一章 流体的方程</a> 
 </h2>
  
@@ -136,7 +149,7 @@
     <ul>
       <li>
         Copyrights &copy;
-        2015-2021
+        2021
         <i class="ri-heart-fill heart_icon"></i> HowsenFisher
       </li>
     </ul>
@@ -430,6 +443,10 @@
 
 <!-- ClickBoom1 -->
 
+<script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script>
+
+<script src="/myblog/js/clickBoom1.js"></script>
+ 
 <!-- ClickBoom2 -->
 
 <!-- CodeCopy -->
