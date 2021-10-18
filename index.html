@@ -170,6 +170,107 @@
     
     
     <article
+  id="post-GAMES201/2-拉格朗日视角"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h2 itemprop="name">
+  <a class="article-title" href="/myblog/2021/10/18/GAMES201/2-%E6%8B%89%E6%A0%BC%E6%9C%97%E6%97%A5%E8%A7%86%E8%A7%92/"
+    >2-拉格朗日视角.md</a> 
+</h2>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/myblog/2021/10/18/GAMES201/2-%E6%8B%89%E6%A0%BC%E6%9C%97%E6%97%A5%E8%A7%86%E8%A7%92/" class="article-date">
+  <time datetime="2021-10-18T01:29:30.000Z" itemprop="datePublished">2021-10-18</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/myblog/categories/GAMES201/">GAMES201</a>
+  </div>
+   
+    </div>
+      
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h4 id="拉格朗日视角与欧拉视角"><a href="#拉格朗日视角与欧拉视角" class="headerlink" title="拉格朗日视角与欧拉视角"></a>拉格朗日视角与欧拉视角</h4><p>拉格朗日：在介质中，有很多“随波逐流”的小纸船，跟着介质一起移动，通常采用粒子，三角网格，节点随着视角一起移动。每一个节点就是一个传感器，检测自己的速度和位置。</p>
+<p>欧拉：传感器永远不移动，如水里的木桩，测量穿过传感器的介质的速度和位置。</p>
+<p><img src="https://i.loli.net/2021/10/18/lByTVnsevPFQ5Hi.png" alt="image-20211018093923899"></p>
+<h4 id="弹簧质点模型"><a href="#弹簧质点模型" class="headerlink" title="弹簧质点模型"></a>弹簧质点模型</h4><p>布料，弹性物体……</p>
+<p>根据胡克定律，质点i，j之间的力是：</p>
+<script type="math/tex; mode=display">
+f_{ij}=-k_0(||x_i-x_j||_2-l_{ij})(\widehat{x_i-x_j})</script><p> 那么质点i收到的弹力的合力为：</p>
+<script type="math/tex; mode=display">
+f_i=\sum_j^{j\neq i}{f_{ij}}</script><p>根据牛顿第二定律：</p>
+<script type="math/tex; mode=display">
+\frac{\partial v_i}{\partial t}=\frac{1}{m_i}f_i</script><p>又因为：</p>
+<script type="math/tex; mode=display">
+\frac{\partial x_i}{\partial t}=v_i</script><p>对于上述两个微分方程，使用前向欧拉：</p>
+<script type="math/tex; mode=display">
+v_{t+1}=v_t+\triangle t\frac{f_t}{m}\\
+x_{t+1}=x_t+\triangle tv_t\\</script><p>或者使用半隐式欧拉：</p>
+<script type="math/tex; mode=display">
+v_{t+1}=v_t+\triangle t\frac{f_t}{m}\\
+x_{t+1}=x_t+\triangle tv_{t+1}\\</script><p>这里步长 $\triangle t$ 是有要求的，我们先给出结论：</p>
+<script type="math/tex; mode=display">
+\triangle t \le c\sqrt{\frac{m}{k}}(c\approx 1)</script><p>具体推到可以做如下分析（TODO）：</p>
+<script type="math/tex; mode=display">
+F=ma=k_0x=m\frac{dv}{dt}=mv\frac{dv}{dx}\\
+\int k_0xdx=\int mvdv\\
+\frac{1}{2}k_0x^2=\frac{1}{2}mv^2+C\\
+x=\sqrt{\frac{m}{k_0}}\cdot v\\
+\frac{dx}{dt}=\sqrt{\frac{k_0}{m}}\cdot x\\
+x'=\sqrt{\frac{k_0}{m}}\cdot x\\</script><script type="math/tex; mode=display">
+\hat{x_{k+1}}=\hat{x_k}+\triangle t\sqrt{\frac{k_0}{m}}\cdot\hat{x_k}=(1+\triangle t\sqrt{\frac{k_0}{m}})\hat{x_k}</script><script type="math/tex; mode=display">
+\hat{x_{k+1}}-\hat{x_{k}}=(\triangle t\sqrt{\frac{k_0}{m}})\hat{x_k}</script><p>将半隐式欧拉写成矩阵形式：</p>
+<script type="math/tex; mode=display">
+v_{t+1}=v_t+\triangle tM^{-1}f(x_{t+1})\\
+x_{t+1}=x_t+\triangle tv_{t+1}\\</script><p>则有：</p>
+<script type="math/tex; mode=display">
+v_{t+1}=v_t+\triangle tM^{-1}f(x_t+\triangle tv_{t+1})\\</script><p>利用牛顿迭代：</p>
+<script type="math/tex; mode=display">
+v_{t+1}=v_t+\triangle tM^{-1}[f(x_t)+\frac{\partial f}{\partial x}(x_t)\triangle tv_{t+1}]\\</script><p>整理得到：</p>
+<script type="math/tex; mode=display">
+[I-\triangle t^2M^{-1}\frac{\partial f}{\partial x}(x_t)]v_{t+1}=v_t+\triangle tM^{-1}f(x_{t})</script><p>简化一下：</p>
+<script type="math/tex; mode=display">
+A=[I-\triangle t^2M^{-1}\frac{\partial f}{\partial x}(x_t)]\\
+b=v_t+\triangle tM^{-1}f(x_{t})\\
+Av_{t+1}=b</script><p>求解代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+<script type="math/tex; mode=display">
+[I-\beta\triangle t^2M^{-1}\frac{\partial f}{\partial x}(x_t)]v_{t+1}=v_t+\triangle tM^{-1}f(x_{t})\\
+\beta=1:后向欧拉\\
+\beta=0:前向欧拉\\
+\beta=0.5:欧拉中点</script><h4 id="SPH-Smoothed-Particle-Hydrodynamics-光滑粒子流体动力学法"><a href="#SPH-Smoothed-Particle-Hydrodynamics-光滑粒子流体动力学法" class="headerlink" title="SPH(Smoothed Particle Hydrodynamics) 光滑粒子流体动力学法"></a>SPH(<em>Smoothed</em> <em>Particle</em> Hydrodynamics) 光滑粒子流体动力学法</h4> 
+      <!-- reward -->
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <footer class="article-footer">
+       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/myblog/tags/GAMES201/" rel="tag">GAMES201</a></li></ul>
+
+    </footer>
+  </div>
+
+    
+ 
+    
+</article>
+
+    
+    <article
   id="post-GAMES201/1-课程介绍"
   class="article article-type-post"
   itemscope
