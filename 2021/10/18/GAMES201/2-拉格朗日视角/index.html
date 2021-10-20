@@ -100,7 +100,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">569</span>
+            <span class="post-count">1.2k</span>
         </span>
     </span>
 
@@ -109,7 +109,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">2 min</span>
+            <span class="post-count">5 min</span>
         </span>
     </span>
 </div>
@@ -124,10 +124,10 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <h4 id="拉格朗日视角与欧拉视角"><a href="#拉格朗日视角与欧拉视角" class="headerlink" title="拉格朗日视角与欧拉视角"></a>拉格朗日视角与欧拉视角</h4><p>拉格朗日：在介质中，有很多“随波逐流”的小纸船，跟着介质一起移动，通常采用粒子，三角网格，节点随着视角一起移动。每一个节点就是一个传感器，检测自己的速度和位置。</p>
+  <h2 id="拉格朗日视角与欧拉视角"><a href="#拉格朗日视角与欧拉视角" class="headerlink" title="拉格朗日视角与欧拉视角"></a>拉格朗日视角与欧拉视角</h2><p>拉格朗日：在介质中，有很多“随波逐流”的小纸船，跟着介质一起移动，通常采用粒子，三角网格，节点随着视角一起移动。每一个节点就是一个传感器，检测自己的速度和位置。</p>
 <p>欧拉：传感器永远不移动，如水里的木桩，测量穿过传感器的介质的速度和位置。</p>
 <p><img src="https://i.loli.net/2021/10/18/lByTVnsevPFQ5Hi.png" alt="image-20211018093923899"></p>
-<h4 id="弹簧质点模型"><a href="#弹簧质点模型" class="headerlink" title="弹簧质点模型"></a>弹簧质点模型</h4><p>布料，弹性物体……</p>
+<h2 id="弹簧质点模型"><a href="#弹簧质点模型" class="headerlink" title="弹簧质点模型"></a>弹簧质点模型</h2><p>布料，弹性物体……</p>
 <p>根据胡克定律，质点i，j之间的力是：</p>
 <script type="math/tex; mode=display">
 f_{ij}=-k_0(||x_i-x_j||_2-l_{ij})(\widehat{x_i-x_j})</script><p> 那么质点i收到的弹力的合力为：</p>
@@ -144,35 +144,61 @@ x_{t+1}=x_t+\triangle tv_t\\</script><p>或者使用半隐式欧拉：</p>
 v_{t+1}=v_t+\triangle t\frac{f_t}{m}\\
 x_{t+1}=x_t+\triangle tv_{t+1}\\</script><p>这里步长 $\triangle t$ 是有要求的，我们先给出结论：</p>
 <script type="math/tex; mode=display">
-\triangle t \le c\sqrt{\frac{m}{k}}(c\approx 1)</script><p>具体推到可以做如下分析（TODO）：</p>
+\triangle t \le c\sqrt{\frac{m}{k}}(c\approx 1)</script><p>具体推导可以做如下分析：</p>
 <script type="math/tex; mode=display">
-F=ma=k_0x=m\frac{dv}{dt}=mv\frac{dv}{dx}\\
-\int k_0xdx=\int mvdv\\
-\frac{1}{2}k_0x^2=\frac{1}{2}mv^2+C\\
-x=\sqrt{\frac{m}{k_0}}\cdot v\\
-\frac{dx}{dt}=\sqrt{\frac{k_0}{m}}\cdot x\\
-x'=\sqrt{\frac{k_0}{m}}\cdot x\\</script><script type="math/tex; mode=display">
-\hat{x_{k+1}}=\hat{x_k}+\triangle t\sqrt{\frac{k_0}{m}}\cdot\hat{x_k}=(1+\triangle t\sqrt{\frac{k_0}{m}})\hat{x_k}</script><script type="math/tex; mode=display">
-\hat{x_{k+1}}-\hat{x_{k}}=(\triangle t\sqrt{\frac{k_0}{m}})\hat{x_k}</script><p>将半隐式欧拉写成矩阵形式：</p>
+由胡克定律：\overrightarrow{F_{弹}}=-k_0\cdot\overrightarrow{x}\\
+根据牛顿第二定律：
+\overrightarrow{F}=m\overrightarrow{a}=m\frac{d\overrightarrow{v}}{dt}=m\overrightarrow{v}\frac{d\overrightarrow{v}}{dx}=m\overrightarrow{g}-k_0\overrightarrow{x}\\
+m\overrightarrow{v}d\overrightarrow{v}=(m\overrightarrow{g}-k_0\overrightarrow{x})d\overrightarrow{x}\\
+mv\cdot\hat{v}d(v\cdot\hat{v})=(mg\cdot\hat{g}-k_0x\cdot\hat{x})d(x\cdot\hat{x})\\
+mv\cdot dv=(mg-k_0x)\cdot dx\\
+\int mv\cdot dv=\int (mg-k_0x)\cdot dx\\
+\frac{1}{2}mv^2=mgx-\frac{1}{2}k_0x^2+C\\
+mv^2=2mgx-k_0x^2\\
+v=\pm\sqrt{2gx-\frac{k}{m}x^2}\\
+所以最大速度：V_{max}=g\sqrt{\frac{m}{k}}\\
+所以最大位移：\triangle x_{max}=\frac{mg}{k}\\
+由CFL条件：\frac{V_{max}\triangle t}{\triangle x}\le C_{max}\approx1\\
+所以：\triangle t\le C_{max}\cdot\frac{\triangle x}{V_{max}}=C_{max}\cdot\frac{\triangle x}{g}\sqrt{\frac{k}{m}}\le C_{max}\cdot\sqrt{\frac{m}{k}}(C_{max}\approx 1)</script><p>将半隐式欧拉写成矩阵形式：(M是质量矩阵，是个对角阵)</p>
 <script type="math/tex; mode=display">
 v_{t+1}=v_t+\triangle tM^{-1}f(x_{t+1})\\
 x_{t+1}=x_t+\triangle tv_{t+1}\\</script><p>则有：</p>
 <script type="math/tex; mode=display">
-v_{t+1}=v_t+\triangle tM^{-1}f(x_t+\triangle tv_{t+1})\\</script><p>利用牛顿迭代：</p>
+v_{t+1}=v_t+\triangle tM^{-1}f(x_t+\triangle tv_{t+1})\\</script><p>利用一阶泰勒展开：</p>
 <script type="math/tex; mode=display">
 v_{t+1}=v_t+\triangle tM^{-1}[f(x_t)+\frac{\partial f}{\partial x}(x_t)\triangle tv_{t+1}]\\</script><p>整理得到：</p>
 <script type="math/tex; mode=display">
-[I-\triangle t^2M^{-1}\frac{\partial f}{\partial x}(x_t)]v_{t+1}=v_t+\triangle tM^{-1}f(x_{t})</script><p>简化一下：</p>
+[I-\triangle t^2M^{-1}\frac{\partial f}{\partial x}(x_t)]v_{t+1}=v_t+\triangle tM^{-1}f(x_{t})</script><script type="math/tex; mode=display">
+广义的，[I-\beta\triangle t^2M^{-1}\frac{\partial f}{\partial x}(x_t)]v_{t+1}=v_t+\triangle tM^{-1}f(x_{t})\\
+\beta=1:后向欧拉\\
+\beta=0:前向欧拉\\
+\beta=0.5:欧拉中点</script><p>简化一下：</p>
 <script type="math/tex; mode=display">
 A=[I-\triangle t^2M^{-1}\frac{\partial f}{\partial x}(x_t)]\\
 b=v_t+\triangle tM^{-1}f(x_{t})\\
-Av_{t+1}=b</script><p>求解代码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+Av_{t+1}=b</script><p>可以用雅可比迭代，高斯赛德尔迭代或者共轭梯度求解，其中雅可比迭代的示例代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> taichi <span class="keyword">as</span> ti</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line">ti.init()</span><br><span class="line"></span><br><span class="line">n = <span class="number">20</span></span><br><span class="line"></span><br><span class="line">A = ti.var(dt=ti.f32, shape=(n, n))</span><br><span class="line">x = ti.var(dt=ti.f32, shape=n)</span><br><span class="line">new_x = ti.var(dt=ti.f32, shape=n)</span><br><span class="line">b = ti.var(dt=ti.f32, shape=n)</span><br><span class="line"></span><br><span class="line"><span class="meta">@ti.kernel</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">iterate</span>():</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">        r = b[i]</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">            <span class="keyword">if</span> i != j:</span><br><span class="line">                r -= A[i, j] * x[j]</span><br><span class="line">                </span><br><span class="line">        new_x[i] = r / A[i, i]</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">        x[i] = new_x[i]</span><br><span class="line"></span><br><span class="line"><span class="meta">@ti.kernel</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">residual</span>() -&gt; ti.f32:</span></span><br><span class="line">    res = <span class="number">0.0</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">        r = b[i] * <span class="number">1.0</span></span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">            r -= A[i, j] * x[j]</span><br><span class="line">        res += r * r</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">        A[i, j] = random.random() - <span class="number">0.5</span></span><br><span class="line"></span><br><span class="line">    A[i, i] += n * <span class="number">0.1</span></span><br><span class="line">    </span><br><span class="line">    b[i] = random.random() * <span class="number">100</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    iterate()</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&#x27;iter <span class="subst">&#123;i&#125;</span>, residual=<span class="subst">&#123;residual():<span class="number">0.10</span>f&#125;</span>&#x27;</span>)</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">    lhs = <span class="number">0.0</span></span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">        lhs += A[i, j] * x[j]</span><br><span class="line">    <span class="keyword">assert</span> <span class="built_in">abs</span>(lhs - b[i]) &lt; <span class="number">1e-4</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="SPH-Smoothed-Particle-Hydrodynamics-光滑粒子流体动力学法"><a href="#SPH-Smoothed-Particle-Hydrodynamics-光滑粒子流体动力学法" class="headerlink" title="SPH(Smoothed Particle Hydrodynamics) 光滑粒子流体动力学法"></a>SPH(<em>Smoothed</em> <em>Particle</em> Hydrodynamics) 光滑粒子流体动力学法</h2><p>SPH最核心的和函数，在x这一点，求加权平均：</p>
 <script type="math/tex; mode=display">
-[I-\beta\triangle t^2M^{-1}\frac{\partial f}{\partial x}(x_t)]v_{t+1}=v_t+\triangle tM^{-1}f(x_{t})\\
-\beta=1:后向欧拉\\
-\beta=0:前向欧拉\\
-\beta=0.5:欧拉中点</script><h4 id="SPH-Smoothed-Particle-Hydrodynamics-光滑粒子流体动力学法"><a href="#SPH-Smoothed-Particle-Hydrodynamics-光滑粒子流体动力学法" class="headerlink" title="SPH(Smoothed Particle Hydrodynamics) 光滑粒子流体动力学法"></a>SPH(<em>Smoothed</em> <em>Particle</em> Hydrodynamics) 光滑粒子流体动力学法</h4> 
+SPH:A(x)=\sum_i A_i\frac{m_i}{\rho_i}W(||x-x_j||_2,h)\\</script><p>W函数分布如下所示：</p>
+<p><img src="https://i.loli.net/2021/10/20/91HeDm8Ux4ufo2C.png" alt="image-20211020132715129"></p>
+<p>A可以表示很对物理量，例如当A表示密度的时候：</p>
+<script type="math/tex; mode=display">
+\rho_i=\sum_jm_jW(||x_i-x_j||_2,h)</script><h4 id="WCSPH方法"><a href="#WCSPH方法" class="headerlink" title="WCSPH方法"></a>WCSPH方法</h4><p>WCSPH方法有如下等式：</p>
+<script type="math/tex; mode=display">
+\frac{Dv}{Dt}=-\frac{1}{\rho}\nabla p+g\\
+p=B((\frac{\rho}{\rho_0})^{\gamma}-1)\\</script><p>B是体积模量，反应物质材料的宏观特性。</p>
+<p>对A求梯度是一件很麻烦的事，WCSPH给出了一种近似方法（不是很准确，但是很对称，稳定性很好）：</p>
+<script type="math/tex; mode=display">
+\nabla A_i=\rho_i\sum_jm_j(\frac{A_i}{\rho_i^2}+\frac{A_j}{\rho_j^2})\nabla_{x_i}W(||x_i-x_j||_2,h)</script><p>所以对于如下微分方程：</p>
+<script type="math/tex; mode=display">
+\frac{Dv}{Dt}=-\frac{1}{\rho}\nabla p+g\\
+\frac{dx}{dt}=v</script><p>运用辛欧拉公式：</p>
+<script type="math/tex; mode=display">
+v_{t+1}=v_t+\triangle t\frac{Dv}{Dt}\\
+x_{t+1}=x_t+\triangle tv_{t+1}</script><h4 id="SPH变种"><a href="#SPH变种" class="headerlink" title="SPH变种"></a>SPH变种</h4><p>PCI-SPH、PBF、DFSPH</p>
+<h4 id="步长限制"><a href="#步长限制" class="headerlink" title="步长限制"></a>步长限制</h4><script type="math/tex; mode=display">
+\triangle t\le C_{max}\cdot\sqrt{\frac{m}{k}}(C_{max}\approx 0.4)</script> 
       <!-- reward -->
       
       <div id="reword-out">
@@ -254,6 +280,15 @@ Av_{t+1}=b</script><p>求解代码如下：</p>
 
    
   <nav class="article-nav">
+    
+      <a href="/myblog/2021/10/20/GAMES201/3-%E6%8B%89%E6%A0%BC%E6%9C%97%E6%97%A5%E8%A7%86%E8%A7%922/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            t
+          
+        </div>
+      </a>
     
     
       <a href="/myblog/2021/10/16/GAMES201/1-%E8%AF%BE%E7%A8%8B%E4%BB%8B%E7%BB%8D/" class="article-nav-link">
