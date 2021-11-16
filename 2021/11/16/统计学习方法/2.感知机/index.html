@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+
+
+<html lang="zh">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="博士之路漫漫，踏踏实实走完" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>第二章 感知机 |  于博士的学习空间</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/myblog/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/myblog/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js"></script>
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link href="https://cdn.bootcss.com/KaTeX/0.11.1/katex.min.css" rel="stylesheet" /></head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      <canvas class="fireworks"></canvas>
+      <style>
+        .fireworks {
+          position: fixed;
+          left: 0;
+          top: 0;
+          z-index: 99999;
+          pointer-events: none;
+        }
+      </style>
+      
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-统计学习方法/2.感知机"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  第二章 感知机
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/myblog/2021/11/16/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/2.%E6%84%9F%E7%9F%A5%E6%9C%BA/" class="article-date">
+  <time datetime="2021-11-16T07:55:56.000Z" itemprop="datePublished">2021-11-16</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/myblog/categories/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">统计学习方法</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">1.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">7 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h1 id="2-1-感知机模型"><a href="#2-1-感知机模型" class="headerlink" title="2.1 感知机模型"></a>2.1 感知机模型</h1><p>$f(x)=sign(w\cdot x+b)$</p>
+<p>线性分类模型，判别模型</p>
+<p>权值w，偏置b，超平面 $S：w\cdot x+b=0$</p>
+<p>几何解释：</p>
+<p><img src="https://i.loli.net/2021/11/05/fpBmnlvLOqa1A2x.png" alt="image-20211105133648775"></p>
+<p>超平面将特征空间划分为两部分，即正负两类，S称为分离超平面</p>
+<p>求得感知机就是求模型参数w,b</p>
+<h1 id="2-2-感知机学习策略"><a href="#2-2-感知机学习策略" class="headerlink" title="2.2 感知机学习策略"></a>2.2 感知机学习策略</h1><h2 id="2-2-1-数据集的线性可分性"><a href="#2-2-1-数据集的线性可分性" class="headerlink" title="2.2.1 数据集的线性可分性"></a>2.2.1 数据集的线性可分性</h2><p>存在超平面S，完全正确的把正负实例点划分到超平面两侧，称数据集是线性可分数据集</p>
+<h2 id="2-2-2-感知机学习策略"><a href="#2-2-2-感知机学习策略" class="headerlink" title="2.2.2 感知机学习策略"></a>2.2.2 感知机学习策略</h2><p><strong>目标</strong>：求得一个将训练集正负实例点完全正确划分的分离超平面</p>
+<p>用误分类点到超平面S的总距离作为损失函数：</p>
+<p>空间任意一点到S的距离：$\frac{1}{|w|}|w\cdot x_0+b|$</p>
+<p>对于误分类点 $(x_i,y_i)$ , 有 $-y_i(w\cdot x_i+b)&gt;0$ ,利用它去掉上式的绝对值: $-\frac{1}{|w|}y_i(w\cdot x_i+b)$</p>
+<p>求和并忽略$-\frac{1}{|w|}$,得到：</p>
+<script type="math/tex; mode=display">
+L(w,b)=-\sum_{x_i \in M}y_i(w\cdot x_i+b)</script><h1 id="2-3-感知机学习算法"><a href="#2-3-感知机学习算法" class="headerlink" title="2.3 感知机学习算法"></a>2.3 感知机学习算法</h1><h2 id="2-3-1-感知机学习算法的原始形式"><a href="#2-3-1-感知机学习算法的原始形式" class="headerlink" title="2.3.1 感知机学习算法的原始形式"></a>2.3.1 感知机学习算法的原始形式</h2><p>求解 $min<em>{w,b} L(w,b)=-\sum</em>{x_i \in M}y_i(w\cdot x_i+b)$，使用随机梯度下降方法，即对随机的一个误分类点使用梯度下降：</p>
+<script type="math/tex; mode=display">
+\frac{\partial L}{\partial w}=-\sum_{x_i \in M}x_iy_i\\
+\frac{\partial L}{\partial b}=-\sum_{x_i \in M}y_i</script><p>对于随机的一个误分类点，有如下更新公式：</p>
+<script type="math/tex; mode=display">
+w \leftarrow w+ \eta y_ix_i\\
+b \leftarrow b+ \eta y_i</script><p>所以有算法如下：</p>
+<p><img src="https://i.loli.net/2021/11/05/5d7bfIEScFkXKrB.png" alt="image-20211105143008162"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Perceptron</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self,X,Y,lr</span>):</span></span><br><span class="line">        self.lr = lr</span><br><span class="line">        self.X = X</span><br><span class="line">        self.pointNum = <span class="built_in">len</span>(X)</span><br><span class="line">        self.Y = Y</span><br><span class="line">        self.w = np.array([<span class="number">0.0</span>]*<span class="built_in">len</span>(X[<span class="number">0</span>]))</span><br><span class="line">        self.b = <span class="number">0</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">findErrorPoint</span>(<span class="params">self</span>):</span></span><br><span class="line">        errorList = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(self.pointNum):</span><br><span class="line">            <span class="keyword">if</span> self.Y[i]*(np.dot(self.w,self.X[i])+self.b)&lt;=<span class="number">0</span>:</span><br><span class="line">                errorList.append(i)</span><br><span class="line">        <span class="keyword">return</span> errorList</span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">step</span>(<span class="params">self</span>):</span></span><br><span class="line">        errorList = self.findErrorPoint()</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(errorList)&gt;<span class="number">0</span>:</span><br><span class="line">            i = np.random.randint(low = <span class="number">0</span>, high= <span class="built_in">len</span>(errorList))</span><br><span class="line">            i= errorList[i]</span><br><span class="line">            self.w += np.dot(self.lr * self.Y[i],self.X[i])</span><br><span class="line">            self.b += self.lr * self.Y[i]</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> -<span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">solve</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">            res = self.step()</span><br><span class="line">            <span class="keyword">if</span> res == -<span class="number">1</span>:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">        <span class="built_in">print</span>(self.w,self.b)</span><br><span class="line">        <span class="keyword">return</span> self.w,self.b</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    X = np.array([[<span class="number">3</span>,<span class="number">3</span>],[<span class="number">4</span>,<span class="number">3</span>],[<span class="number">1</span>,<span class="number">1</span>]])</span><br><span class="line">    Y = np.array([<span class="number">1</span>,<span class="number">1</span>,-<span class="number">1</span>])</span><br><span class="line">    lr = <span class="number">1</span></span><br><span class="line">    perceptron = Perceptron(X,Y,lr)</span><br><span class="line">    w,b = perceptron.solve()</span><br><span class="line">    x_list = [i[<span class="number">0</span>] <span class="keyword">for</span> i <span class="keyword">in</span> X.tolist()]</span><br><span class="line">    y_list = [i[<span class="number">1</span>] <span class="keyword">for</span> i <span class="keyword">in</span> X.tolist()]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(x_list)):</span><br><span class="line">        <span class="keyword">if</span> Y[i]==-<span class="number">1</span>:</span><br><span class="line">            plt.plot(x_list[i],y_list[i],<span class="string">&#x27;ro&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            plt.plot(x_list[i],y_list[i],<span class="string">&#x27;bo&#x27;</span>)</span><br><span class="line">    </span><br><span class="line">    new_x = np.arange(-<span class="number">5</span>,<span class="number">5</span>,<span class="number">0.01</span>)</span><br><span class="line">    <span class="keyword">if</span> w[<span class="number">1</span>]==<span class="number">0</span>:</span><br><span class="line">        new_y = np.arange(-<span class="number">5</span>,<span class="number">5</span>,<span class="number">0.01</span>)</span><br><span class="line">        new_x = [(-b)/w[<span class="number">0</span>]]*<span class="built_in">len</span>(new_x.tolist())</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        new_y = [(-w[<span class="number">0</span>]*i-b)/w[<span class="number">1</span>] <span class="keyword">for</span> i <span class="keyword">in</span> new_x.tolist()]</span><br><span class="line">    plt.plot(new_x,new_y,<span class="string">&#x27;b&#x27;</span>)</span><br><span class="line">    plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre><code>[1. 1.] -3
+</code></pre><p><img src="https://i.loli.net/2021/11/16/gZVQuAbT3Yo5yS1.png" alt="png"></p>
+<h2 id="2-3-2-算法的收敛性"><a href="#2-3-2-算法的收敛性" class="headerlink" title="2.3.2 算法的收敛性"></a>2.3.2 算法的收敛性</h2><p>感知机原始算法是收敛的</p>
+<p><img src="https://i.loli.net/2021/11/05/OlzjJtpSTaEwIgL.png" alt="image-20211105183114623"></p>
+<h2 id="2-3-3-感知机学习算法的对偶形式"><a href="#2-3-3-感知机学习算法的对偶形式" class="headerlink" title="2.3.3 感知机学习算法的对偶形式"></a>2.3.3 感知机学习算法的对偶形式</h2><p><img src="https://i.loli.net/2021/11/06/noTY7uG1fWqREBk.png" alt="image-20211106144442174"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    本模块是感知机对偶算法的太极实现</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> taichi <span class="keyword">as</span> ti</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@ti.data_oriented</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PerceptronDual</span>:</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        感知机对偶类</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, x: np.array, y: np.array</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">            感知机对偶的构造函数</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">            Args:</span></span><br><span class="line"><span class="string">                x: 数据集</span></span><br><span class="line"><span class="string">                y: 标签</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 初始化太极</span></span><br><span class="line">        ti.init(arch=ti.cpu)</span><br><span class="line">        self.pointNum = <span class="built_in">len</span>(x)  <span class="comment"># 数据集中点的个数</span></span><br><span class="line">        self.VecLen = <span class="built_in">len</span>(x[<span class="number">0</span>])  <span class="comment"># 数据集中点的维度</span></span><br><span class="line">        self.G = ti.field(ti.f32, shape=(</span><br><span class="line">            self.pointNum, self.pointNum))  <span class="comment"># Gram矩阵</span></span><br><span class="line">        self.alpha = ti.field(ti.f32, shape=self.pointNum)  <span class="comment"># α</span></span><br><span class="line">        self.b = ti.field(ti.f32, shape=())  <span class="comment"># b</span></span><br><span class="line">        self.X = ti.Vector.field(<span class="number">2</span>, ti.f32, shape=self.pointNum)  <span class="comment"># x</span></span><br><span class="line">        self.Y = ti.field(ti.f32, shape=self.pointNum)          <span class="comment"># y</span></span><br><span class="line">        self.w = ti.Vector.field(self.VecLen, ti.f32, shape=()) <span class="comment"># w</span></span><br><span class="line">        <span class="comment"># np --&gt; taichi</span></span><br><span class="line">        self.X.from_numpy(x)</span><br><span class="line">        self.Y.from_numpy(y)</span><br><span class="line">        self.K = ti.field(ti.f32, shape=self.pointNum) <span class="comment"># 误分条件暂存</span></span><br><span class="line">        self.lock = ti.field(ti.f32, shape=()) <span class="comment"># 为了跳出循环,自写了lock</span></span><br><span class="line">        </span><br><span class="line"><span class="meta">    @ti.kernel</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">cal_G</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">            计算Gram矩阵,此函数并行计算</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">for</span> i, j <span class="keyword">in</span> self.G:</span><br><span class="line">            self.G[i, j] += self.X[i].dot(self.X[j])</span><br><span class="line"></span><br><span class="line"><span class="meta">    @ti.kernel</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wufentiaojian</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">            计算误分条件,此函数并行计算</span></span><br><span class="line"><span class="string">            实现了 Y[i]*(sum&#123;αj*Yj*Xi*Xj&#125;+b)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> self.K:</span><br><span class="line">            self.K[i] = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> i, j <span class="keyword">in</span> self.G:</span><br><span class="line">            self.K[i] += (self.alpha[j]*self.G[i, j]*self.Y[j])</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> self.K:</span><br><span class="line">            self.K[i] += self.b[<span class="literal">None</span>]</span><br><span class="line">            self.K[i] *= self.Y[i]</span><br><span class="line"></span><br><span class="line"><span class="meta">    @ti.kernel</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">iterate</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">            一步迭代</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        self.lock[<span class="literal">None</span>] = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> self.K:</span><br><span class="line">            <span class="comment"># 找到一个误分的点,且只找一个</span></span><br><span class="line">            <span class="keyword">if</span> self.K[i] &lt;= <span class="number">0</span> <span class="keyword">and</span> self.lock[<span class="literal">None</span>] &lt; <span class="number">1</span>:</span><br><span class="line">                <span class="comment"># 更新参数</span></span><br><span class="line">                self.alpha[i] += <span class="number">1.0</span></span><br><span class="line">                self.b[<span class="literal">None</span>] += self.Y[i]</span><br><span class="line">                self.lock[<span class="literal">None</span>] += <span class="number">1.0</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @ti.kernel</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">cal_W</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">            计算权重向量</span></span><br><span class="line"><span class="string">            W = sum&#123;αi * Yi * Xi&#125;</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> self.Y:</span><br><span class="line">            self.w[<span class="literal">None</span>] += self.alpha[i] * self.Y[i] * self.X[i]</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">solve</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">            感知机求解</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 计算Gram矩阵</span></span><br><span class="line">        self.cal_G()</span><br><span class="line">        <span class="comment"># 循环迭代</span></span><br><span class="line">        <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">            <span class="comment"># 计算误分</span></span><br><span class="line">            self.wufentiaojian()</span><br><span class="line">            <span class="comment"># 迭代一次</span></span><br><span class="line">            self.iterate()</span><br><span class="line">            <span class="comment"># 打印参数</span></span><br><span class="line">            <span class="built_in">print</span>(self.alpha, self.b, self.K)</span><br><span class="line">            <span class="comment"># 检测到没有误分跳出</span></span><br><span class="line">            K_np = self.K.to_numpy()</span><br><span class="line">            zheng = <span class="number">0</span></span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> K_np.tolist():</span><br><span class="line">                <span class="keyword">if</span> i &gt; <span class="number">0</span>:</span><br><span class="line">                    zheng += <span class="number">1</span></span><br><span class="line">            <span class="keyword">if</span> zheng == <span class="built_in">len</span>(K_np.tolist()):</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">        <span class="comment"># 计算权值向量</span></span><br><span class="line">        self.cal_W()</span><br><span class="line">        <span class="comment"># 返回参数</span></span><br><span class="line">        <span class="keyword">return</span> self.w[<span class="literal">None</span>], self.alpha.to_numpy(), self.b.to_numpy()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="comment"># 求解部分:</span></span><br><span class="line">    x = np.array([[<span class="number">3</span>, <span class="number">3</span>], [<span class="number">4</span>, <span class="number">3</span>], [<span class="number">1</span>, <span class="number">1</span>]])</span><br><span class="line">    y = np.array([<span class="number">1</span>, <span class="number">1</span>, -<span class="number">1</span>])</span><br><span class="line">    perceptronDual = PerceptronDual(x, y)</span><br><span class="line">    w, alpha, b = perceptronDual.solve()</span><br><span class="line">    <span class="built_in">print</span>(w, alpha, b)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 绘图部分:</span></span><br><span class="line">    x_list = [i[<span class="number">0</span>] <span class="keyword">for</span> i <span class="keyword">in</span> x.tolist()]</span><br><span class="line">    y_list = [i[<span class="number">1</span>] <span class="keyword">for</span> i <span class="keyword">in</span> x.tolist()]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(x_list)):</span><br><span class="line">        <span class="keyword">if</span> y[i] == -<span class="number">1</span>:</span><br><span class="line">            plt.plot(x_list[i], y_list[i], <span class="string">&#x27;ro&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            plt.plot(x_list[i], y_list[i], <span class="string">&#x27;bo&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    new_x = np.arange(-<span class="number">5</span>, <span class="number">5</span>, <span class="number">0.01</span>)</span><br><span class="line">    <span class="keyword">if</span> w[<span class="number">1</span>] == <span class="number">0</span>:</span><br><span class="line">        new_y = np.arange(-<span class="number">5</span>, <span class="number">5</span>, <span class="number">0.01</span>)</span><br><span class="line">        new_x = [(-b)/w[<span class="number">0</span>]]*<span class="built_in">len</span>(new_x.tolist())</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        new_y = [(-w[<span class="number">0</span>]*i-b)/w[<span class="number">1</span>] <span class="keyword">for</span> i <span class="keyword">in</span> new_x.tolist()]</span><br><span class="line">    plt.plot(new_x, new_y, <span class="string">&#x27;b&#x27;</span>)</span><br><span class="line">    plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre><code>[Taichi] version 0.8.3, llvm 10.0.0, commit 021af5d2, win, python 3.8.5
+[Taichi] Starting on arch=x64
+[1. 0. 0.] 1.0 [ 0.  0. -0.]
+[1. 0. 1.] 0.0 [19. 22. -7.]
+[1. 0. 2.] -1.0 [12. 14. -4.]
+[1. 0. 3.] -2.0 [ 5.  6. -1.]
+[2. 0. 3.] -1.0 [-2. -2.  2.]
+[2. 0. 4.] -2.0 [17. 20. -5.]
+[2. 0. 5.] -3.0 [10. 12. -2.]
+[2. 0. 5.] -3.0 [3. 4. 1.]
+[1. 1.] [2. 0. 5.] -3.0
+</code></pre><p><img src="https://i.loli.net/2021/11/16/gZVQuAbT3Yo5yS1.png" alt="png"></p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          Donate
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://yuyuyu223.github.io/myblog/2021/11/16/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/2.%E6%84%9F%E7%9F%A5%E6%9C%BA/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/myblog/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/" rel="tag">统计学习方法</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/myblog/2021/11/16/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/3.k%E8%BF%91%E9%82%BB%E6%B3%95/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            第三章 k近邻法
+          
+        </div>
+      </a>
+    
+    
+      <a href="/myblog/2021/11/16/%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/1.%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95%E6%A6%82%E8%AE%BA/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">第一章 统计学习方法概论</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "E7xzQADC2OcniNaUzpJkh72k-gzGzoHsz",
+    app_key: "oNWCs2sShVR9HmjX6TaWxf7e",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> HowsenFisher
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/myblog/"><img src="/myblog/images/ayer-side.svg" alt="于博士的学习空间"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/tags/%E6%97%85%E8%A1%8C/">旅行</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" target="_blank" rel="noopener" href="http://shenyu-vip.lofter.com">摄影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/2019/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/myblog/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/myblog/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/myblog/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/myblog/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/myblog/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+ <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true,
+  };
+</script>
+
+<!-- Katex -->
+ 
+    
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
+        
+            <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js"></script>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css">
+        
+    
+ 
+<!-- busuanzi  -->
+ 
+<script src="/myblog/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script>
+
+<script src="/myblog/js/clickBoom1.js"></script>
+ 
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/myblog/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>
