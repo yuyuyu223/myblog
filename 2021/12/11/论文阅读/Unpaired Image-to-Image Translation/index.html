@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+
+
+<html lang="zh">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="博士之路漫漫，踏踏实实走完" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Unpaired Image-to-Image Translation |  于博士的学习空间</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="/favicon.ico" />
+       
+<link rel="stylesheet" href="/myblog/dist/main.css">
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/css/remixicon.min.css"
+      />
+      
+<link rel="stylesheet" href="/myblog/css/custom.css">
+ 
+      <script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+       
+ 
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@8.9.2/dist/mermaid.min.js"></script>
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link href="https://cdn.bootcss.com/KaTeX/0.11.1/katex.min.css" rel="stylesheet" /></head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      <canvas class="fireworks"></canvas>
+      <style>
+        .fireworks {
+          position: fixed;
+          left: 0;
+          top: 0;
+          z-index: 99999;
+          pointer-events: none;
+        }
+      </style>
+      
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-论文阅读/Unpaired Image-to-Image Translation"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Unpaired Image-to-Image Translation
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/myblog/2021/12/11/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/Unpaired%20Image-to-Image%20Translation/" class="article-date">
+  <time datetime="2021-12-11T14:05:56.000Z" itemprop="datePublished">2021-12-11</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/myblog/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">论文阅读</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">2.6k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">8 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h2 id="摘要">摘要</h2>
+<ul>
+<li>图到图的转换</li>
+<li>提出了一种学习将图像从源域X转换到目标域Y的方法，没有成对的数据</li>
+<li>来自G(X)的图像与使用对抗损失的分布Y难以区分</li>
+<li>我们把映射G:X→Y和逆映射F: Y→X结合起来</li>
+<li>CycleGAN可以做：风格转移，物品变形，季节转移，照片增强</li>
+</ul>
+<h2 id="介绍">介绍</h2>
+<p>克劳德·莫奈把画架放在靠近阿让特伊的塞纳河岸边时(左图)，他看到了什么?如果彩色照片被发明出来，它可能会记录下清新的蓝天和反射着蓝天的玻璃般的河流（右图）。莫奈通过纤细的笔触和明亮的调色板表达了他对同一场景的印象。</p>
+<p><img src="https://picgo-1251894956.cos.ap-beijing.myqcloud.com/202112311335728.png" alt="image-20211129135014434"></p>
+<p>如果莫奈碰巧在一个凉爽的夏日傍晚来到了卡西斯的小港口(图1，左下)，会怎么样?在莫奈的画廊里漫步片刻，你就能想象出他是如何描绘出这一场景的:也许是柔和的色调，突兀的几笔笔触，再加上些许平展的动态范围。</p>
+<p><img src="https://picgo-1251894956.cos.ap-beijing.myqcloud.com/202112311336717.png" alt="image-20211129134945679"></p>
+<p>尽管我们从未见过莫奈的画作和他所画场景的照片并排摆放，但我们可以想象这一切。相反，我们知道的是莫奈的一组画作和一组风景照片。我们可以推断出它们在两个场景上的差异，然后想象一下，如果我们把一个场景从一个场景“翻译”到另一个场景，会是什么样子。</p>
+<p>在本文中，我们提出了一种可以学习做同样事情的方法:捕获一个图像集合的特殊特征，并计算如何将这些特征翻译到另一个图像集合，所有这些都在没有任何成对的训练数据的情况下。</p>
+<p>这个问题可以更广泛地描述为图像-图像转换，将图像从给定场景的一种表示(x)转换为另一种表示(y)，例如，从灰度到颜色，从图像到语义标签，从边缘地图到照片。多年来在计算机视觉、图像处理、计算摄影和图形学方面的研究已经产生了强大的翻译监督系统，数据对是可以用的：</p>
+<p><img src="https://picgo-1251894956.cos.ap-beijing.myqcloud.com/202112311336147.png" alt="image-20211129135610330"></p>
+<p>然而，获得成对的训练数据可能是困难和昂贵的。例如，只有几个数据集存在于像语义分割这样的任务中，而且它们相对较小。为艺术程式化等图形任务获取输入-输出对可能更加困难，因为所需的输出非常复杂，通常需要艺术创作。对于许多任务，如物体变形(例如，斑马转换为马)，期望的输出甚至没有明确定义。</p>
+<p><img src="https://picgo-1251894956.cos.ap-beijing.myqcloud.com/202112311336732.png" alt="image-20211129135807425"></p>
+<p>因此，我们寻求一种算法，可以学习没有成对的输入输出数据的域之间的转换。我们假设域之间有一些潜在的关系——例如，它们是同一潜在场景的两种不同的渲染——并试图了解这种关系。虽然我们缺乏成对数据形式的监督，但我们可以在集合水平上利用监督：我们在域X中得到一组图像，在域Y中得到另一组图像。我们可以训练一个映射G: X→Y，使输出Yˆ= G(X)， X∈X，与图像Y∈Y不可区分，而训练一个对手将Yˆ与Y区分开来。理论上，这个目标可以诱导出yˆ上的输出分布，与经验分布pdata(y)相匹配(通常，这需要G为随机)。因此，最优G将域X转换为域Yˆ，该域与Y分布相同。然而，这样的转换并不能保证单个输入x和输出y以一种有意义的方式配对——有无限多个映射G将在yˆ上产生相同的分布。此外，在实践中，我们发现很难单独优化对抗目标:标准程序常常导致众所周知的模式崩溃问题，即所有输入图像映射到相同的输出图像，而优化未能取得进展。</p>
+<p>这些问题要求我们增加目标的结构。因此，我们利用翻译应该是“循环一致”的属性，也就是说，如果我们把一个句子从英语翻译成法语，然后再把它从法语翻译成英语，我们应该回到原来的句子。从数学上讲，如果我们有一个翻译器G: X→Y和另一个翻译器F: Y→X，那么G和F应该是彼此的逆，而且两个映射都应该是双射。我们通过同时训练映射G和F，并添加一个循环一致性损失来应用这个结构假设，以鼓励F(G(x))≈x和G(F(y))≈y。将这种损失与X和Y域的对抗性损失结合起来，就产生了未配对图像到图像转换的完整目标。</p>
+<p>我们将我们的方法应用于广泛的应用，包括集合风格转移，物体变形，季节转移和照片增强。我们还比较了以前依赖于手工定义的样式和内容分解或共享嵌入函数的方法，并表明我们的方法优于这些基线。我们同时提供PyTorch和Torch实现。在我们的网站上查看更多的结果。</p>
+<h2 id="相关工作">相关工作</h2>
+<p>生成对抗网络(GANs)在图像生成、图像编辑和表示学习方面取得了令人印象深刻的成果。最近的方法采用了相同的思想，用于条件图像生成应用程序，如text2image，图像修复和未来预测，以及其他领域，如视频和3D数据。GANs成功的关键在于它的理念是一种对抗性的损失，迫使生成的图像在原则上与真实的照片难以区分。这种损失在图像生成任务中尤其强大，因为这正是许多计算机图形学致力于优化的目标。我们采用对抗性损失来学习这样的映射让转换的图像与目标域内的图像无法区分。</p>
+<p>图像到图像转换的概念至少可以追溯到Hertzmann等人的图像类比，他在单个输入-输出训练图像对上使用非参数纹理模型。最近的方法是使用输入-输出示例的数据集来学习使用cnn的参数转换函数。我们的方法建立在Isola等人的的pix2pix框架上，它使用一个有条件的生成对抗网络来学习从输入到输出图像的映射。类似的想法被应用到各种任务中，如从草图或从属性和语义布局生成照片。然而，与前面的工作不同的是，我们不需要成对的训练示例来学习映射。</p>
+<p>未配对的图像到图像转换还有其他几种方法也可以处理未配对的设置，其中的目标是关联两个数据域:X和Y。Rosales等人提出了一个贝叶斯框架，包括基于从源图像计算的基于补丁的马尔可夫随机场的先验和从多个风格图像获得的似然项。最近，CoGAN和跨模态场景网络使用权重共享策略来学习跨域的公共表示。与我们的方法同时，Liu等人的扩展了上述框架，结合了变分自编码器和生成对抗网络。另一项并行工作鼓励输入和输出共享特定的“内容”特性，即使它们可能有不同的“风格”。这些方法还使用对抗网络，在预定义的度量空间中使用附加的术语强制输出接近输入，例如类标签空间、图像像素空间和图像特征空间。</p>
+<p>与上述方法不同，我们的公式不依赖于任何特定于任务的、预定义的输入和输出之间的相似函数，也不假设输入和输出必须位于相同的低维嵌入空间。这使得我们的方法成为许多视觉和图形任务的通用解决方案。在第5.1节中，我们直接比较了几种先前的和当代的方法。</p>
+<p>使用传递性作为一种规范化结构化数据的方法的想法有很长的历史。在视觉跟踪中，几十年来，执行简单的前后一致性一直是一种标准技巧。在语言领域，通过反翻译和协调来验证和改进翻译是人类译者（幽默地说，包括Mark Twain）和机器使用的一种技术。最近，高阶循环一致性已被用于从运动结构，三维形状匹配，协切分，密集语义对齐和深度估计。其中，Zhou等人[64]和Godard等人[14]与我们的工作最为相似，因为他们使用循环一致性损失作为传递性监督CNN训练的一种方式。在这项工作中，我们引入一个相似的损失来推动G和F彼此一致。与我们的工作同时，在这些相同的过程中，Yi等人在机器翻译中受到双重学习的启发，独立地使用了一个类似的目标来进行图像对图像的翻译。</p>
+<p>神经风格转移是另一种进行图像到图像平移的方法，即在匹配预训练的深度特征的Gram矩阵统计值的基础上，将一幅图像的内容与另一幅图像(通常是一幅绘画)的风格相结合，合成一幅新图像。另一方面，我们的主要关注点是通过尝试捕获高级外观结构之间的对应关系，学习两个图像集合之间的映射，而不是两个特定的图像之间的射。因此，我们的方法可以应用于其他任务，例如绘画→照片，物体变形等单一样本转移方法不能很好执行。我们在第5.2节比较了这两种方法。</p>
+<h2 id="公式">公式</h2>
+<p>我们的目标是学习两个域X和Y之间的映射函数，给定训练样本</p>
+<p><img src="https://picgo-1251894956.cos.ap-beijing.myqcloud.com/202112311336778.png" alt="image-20211129150442265"></p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          Donate
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://yuyuyu223.github.io/myblog/2021/12/11/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/Unpaired%20Image-to-Image%20Translation/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/myblog/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/" rel="tag">论文阅读</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/myblog/2021/12/15/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/NeRF%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            NeRF论文阅读
+          
+        </div>
+      </a>
+    
+    
+      <a href="/myblog/2021/12/08/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/GAN%E7%9A%84Loss%E7%9A%84%E7%90%86%E8%A7%A3/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">GAN的Loss的理解</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "E7xzQADC2OcniNaUzpJkh72k-gzGzoHsz",
+    app_key: "oNWCs2sShVR9HmjX6TaWxf7e",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "给我的文章加点评论吧~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+     
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2021
+        <i class="ri-heart-fill heart_icon"></i> HowsenFisher
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/myblog/"><img src="/myblog/images/ayer-side.svg" alt="于博士的学习空间"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/tags/%E6%97%85%E8%A1%8C/">旅行</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/myblog/2019/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/myblog/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯咖啡吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/Shen-Yu/cdn/img/wechat.jpg">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/myblog/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/myblog/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/myblog/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/myblog/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css">
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+ <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+      tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+  });
+
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for(i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.6/unpacked/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+  var ayerConfig = {
+    mathjax: true,
+  };
+</script>
+
+<!-- Katex -->
+ 
+    
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
+        
+            <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.js"></script>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/copy-tex.min.css">
+        
+    
+ 
+<!-- busuanzi  -->
+ 
+<script src="/myblog/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script>
+
+<script src="/myblog/js/clickBoom1.js"></script>
+ 
+<!-- ClickBoom2 -->
+
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/myblog/css/clipboard.css">
+ <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/myblog/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    <div id="music">
+    
+    
+    
+    <iframe frameborder="no" border="1" marginwidth="0" marginheight="0" width="200" height="86"
+        src="//music.163.com/outchain/player?type=2&id=22707008&auto=1&height=66"></iframe>
+</div>
+
+<style>
+    #music {
+        position: fixed;
+        right: 15px;
+        bottom: 0;
+        z-index: 998;
+    }
+</style>
+    
+    
+
+  </div>
+</body>
+
+</html>

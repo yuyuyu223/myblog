@@ -100,7 +100,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-quill-pen-line"></i>
             <span class="post-meta-item-text"> Word count:</span>
-            <span class="post-count">3.7k</span>
+            <span class="post-count">5.8k</span>
         </span>
     </span>
 
@@ -109,7 +109,7 @@
         <span class="post-meta-item-icon">
             <i class="ri-book-open-line"></i>
             <span class="post-meta-item-text"> Reading time≈</span>
-            <span class="post-count">14 min</span>
+            <span class="post-count">21 min</span>
         </span>
     </span>
 </div>
@@ -314,6 +314,22 @@
 <p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mi>p</mi><mo>=</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">Ap=b
 </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">A</span><span class="mord mathdefault">p</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">b</span></span></span></span></span></p>
 <p>当然，在我们目前讨论的实现中，p和b在逻辑上存储在一个二维或三维网格结构中（因为每个条目对应一个网格单元）。</p>
+<p>我们不需要把A直接存储为一个矩阵。请注意，A的每一行对应一个方程，即一个流体单元。例如，如果网格单元$$(i,j,k)$$是流体的，那么将会有一行矩阵，我们可以用索引$$(i,j,k)$$进行标记。这一行中的条目是该方程中所有压力未知数的系数。除了 $$p_{i,j,k}$$ 及其六个邻居对应的七个项外，几乎所有这些都是零（当然，在二维空间中，最多有四个邻居。）我们只需要非零$$(i,j,k)$$和它的流体单元邻居。存储所有的零当然是毫无意义的：这需要一个稀疏矩阵。</p>
+<p>矩阵A的一个很好的性质是它是对称的。例如计算单元$$(i,j,k)$$ 的压力时，$$p_{i+1,j,k}$$ 前的系数是 $$A_{(i,j,k),(i+1,j,k)}$$ ，他应该与 $$A_{(i+1,j,k),(i,j,k)}$$ 相等。如果这两个单元格中的一个不是流体的，那么它要么是零，要么是相同的非零值。这种对称性即使在本章的结尾进行更高级的离散化，也将成立。因此，我们只需要在A中存储一半的非零条目，因为另一半只是副本！</p>
+<p>这将导致我们使用以下结构存储A。在二维空间中，我们将在每个网格单元中存储三个数字：对角线元素 $$A_{(i,j),(i,j)}$$ 和正方向的相邻单元格，$$A_{(i,j),(i+1,j)}$$ 和 $$A_{(i,j),(i,j+1)}$$ 。我们可以在我们的代码中调用这些数字 $$Adiag(i,j)$$、$$Aplusi(i,j)$$ 和 $$Aplusj(i,j)$$ 。在三维空间中，我们同样会有$$Adiag(i,j,k)$$ ，$$Aplusi(i,j,k)$$ ，$$Aplusj(i,j,k)$$ 和 $$Aplusk(i,j,k)$$。当我们需要引用像 $$A_{(i,j),(i−1，j)}$$ 这样的项时，我们使用对称，而不是引用$$A_{(i−1,j),(i,j)}=Aplusi(i-1,j)$$ 。在此结构中设置矩阵的伪代码见图4.4。</p>
+<p><img src="https://i.loli.net/2021/11/17/p5IZG4wfc6ykiRu.png" alt="image-20211117192130559"></p>
+<h4 id="共轭梯度算法">共轭梯度算法</h4>
+<p>矩阵A是一种非常著名的矩阵，有时被称为二维或三维的五点或七点拉普拉斯矩阵。它已经被详尽地研究过，作为无数的数字线性代数论文的主题，并且是几乎在任何情况下稀疏矩阵的第一个典型例子。用这种类型的矩阵求解线性系统所付出的努力可能比所有其他稀疏矩阵加起来还要多！我们不会深入研究它，除了一种特别的算法，它既相当有效，也非常容易实现，即使是不规则的域。它叫<em>MICCG(0)</em>，或更完全修改的不完全Cholesky共轭梯度，零级。真拗口！让我们慢慢来。</p>
+<p>A的许多特性之一是对称正定(SPD)。在技术上，这意味着任何非零向量q，满足 $$q^TAq&gt;0$$。</p>
+<p>实际上，在继续之前，我应该再仔细一点。A可能是对称的正半定的，这意味着 $$q^TAq≥0$$ (对于某些非零q实现为零)。如果有一个完全被固体壁包围的流体区域，没有空气室，那么A就不是严格的正定的。在这种情况下，A实际上是奇异的——它没有逆矩阵。然而，这并不一定意味着没有解决方案。如果散度(右边)满足一个相容条件，那么生命是美好的，存在一个解。相容性条件很简单，就是固体壁的速度与其中所含的不可压缩流体的速度相容，即流体-固体边界面壁面速度加起来为零，因此流入的流动与流出的流动相平衡——我们将在本章的最后讨论如何确保这是这种情况。事实上，不仅会有一个解，而且会有无穷多个解!你可以取压强的任意解，加上任意常数，得到另一个解。但是，当我们用压力梯度来更新速度时，常数消去了所以我们不关心得到的是哪个解。他们都很好。</p>
+<p>求解对称正半定线性系统的一个特别有用的算法叫做共轭梯度算法，通常缩写为CG。这是一种迭代方法，意味着我们从猜测解开始，在每次迭代中不断改进，直到我们认为足够准确时才停止。CG选择对猜测进行迭代更新以使误差的某一特定度量最小，从而保证最终收敛于解。CG的另一个很好的方面，例如，与高斯消去法相比，每次迭代只涉及A乘以一个向量，加上向量，向量乘以标量，以及计算一些点积。这些都很容易编码，其中大部分都可以通过调用高度优化的标准库来实现(下面将详细介绍)。</p>
+<p>然而，CG的问题在于网格越大，收敛的时间就越长。可以看出，收敛到某种期望精度所需的迭代次数与网格的宽度成正比：任意一个方向上网格单元的最大数目。实际上，存在局限于少量的迭代甚至更简单的算法，比如Gauss-Seidel（此处未涉及）往往比普通的CG要好得多。然而，有一种技巧可以加速这一过程，叫做预处理。我们将使用预条件共轭梯度(PCG)。</p>
+<p>更一般地说，CG需要更多的迭代，因为A离单位矩阵i越远，用单位矩阵求解系统就越容易——$$Ip = b$$ 的解就是$$p = b$$ ！我们如何精确地测量A与单位矩阵的距离已经超出了这本书的范围——这叫做A的条件数，预处理的思想是，对于任何可逆矩阵M， $$Ap=b$$ 的解和 $$MAp=Mb$$ 的解是一样的。如果M近似等于A的逆矩阵，那么MA很接近单位矩阵，那么CG应该能够很快地解出前提方程 $$MAp = Mb$$ 。PCG是将CG应用到这些预处理方程的一种聪明的方法而不需要生成它们。</p>
+<p>在我们真正接触PCG的细节之前，我们需要讨论一下收敛。我们什么时候知道停止?我们如何检查当前的猜测是否足够接近解?理想情况下，我们只需要测量当前猜测值与精确解之间的差值的范数——当然，这需要知道精确解!所以我们将转而研究一个叫做残差的向量:</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mi>i</mi></msub><mo>=</mo><mi>b</mi><mo>−</mo><mi>A</mi><msub><mi>p</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">r_i=b-Ap_i
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.02778em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.77777em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">b</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">A</span><span class="mord"><span class="mord mathdefault">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p>也就是说，如果对真实解的第i个猜测，第i个残差 $$r_i$$ 就是它与满足方程 $$Ap = b$$ 的距离。当我们找到精确解时，残差恰好是0。因此，当残差的范数足够小，低于一定的容忍度时，我们停止迭代。</p>
+<p>这就引出了下一个问题:多小才算足够小?你用什么标准来测量 $$r_i$$ ?回想一下 $$r_i$$ 在物理上的含义。这些方程源于推导$$ b−Ap$$ 是 $$\overrightarrow{u}^{n+1}$$ 散度的有限差分估计的负，我们希望它为零。因此，剩余量准确地测量了在我们用当前的压力估计更新速度场之后，速度场中会有多少散度。那么，取残差的无穷范数(任何条目的最大绝对值)并将其与一个小量tol进行比较似乎是合理的，这样我们就知道了新速度场可压缩程度的最坏情况。tol的维数是1除以时间：$$O(1/tol)$$​ 是一个下限，表示不精确的速度场将流体压缩到某个分数所需要的时间。因此，代价可能与我们模拟的时间长度成反比。在实践中，这要么变化不大(大多数镜头只有几秒钟)，要么我们在做一个可能具有无限时间长度的交互式动画——所以最后我们只是为tol选择一个任意的固定数字，比如 $$10^{−6}/s$$。</p>
  
       <!-- reward -->
       
@@ -865,8 +881,8 @@
     
     
     
-    <iframe frameborder="no" border="1" marginwidth="0" marginheight="0" width="200" height="52"
-        src="//music.163.com/outchain/player?type=2&id=22707008&auto=1&height=32"></iframe>
+    <iframe frameborder="no" border="1" marginwidth="0" marginheight="0" width="200" height="86"
+        src="//music.163.com/outchain/player?type=2&id=22707008&auto=1&height=66"></iframe>
 </div>
 
 <style>
